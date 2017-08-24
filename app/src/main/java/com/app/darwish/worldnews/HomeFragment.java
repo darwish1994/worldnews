@@ -1,8 +1,11 @@
 package com.app.darwish.worldnews;
 
 import android.app.ActionBar;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
@@ -27,6 +30,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.darwish.worldnews.adapter.DrowableListAdapter;
 import com.app.darwish.worldnews.adapter.myAdapter;
+import com.app.darwish.worldnews.contentProviders.DbHelper;
+import com.app.darwish.worldnews.contentProviders.NewsContract;
 import com.app.darwish.worldnews.data.NewsData;
 import com.app.darwish.worldnews.data.ScroleListData;
 import com.app.darwish.worldnews.data.SourceItem;
@@ -34,6 +39,11 @@ import com.app.darwish.worldnews.data.SourceItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 /**
@@ -98,7 +108,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SourceItem x = customAdapter.getItem(position);
-                ((Callback)getActivity()).onItemSelected(x);
+                ((Callback) getActivity()).onItemSelected(x);
 
 
             }
@@ -113,9 +123,9 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ScroleListData listData = drowableListAdapter.getItem(position);
-                Uri uri1=Uri.parse(url).buildUpon().appendQueryParameter("language", language[0]).
+                Uri uri1 = Uri.parse(url).buildUpon().appendQueryParameter("language", language[0]).
                         appendQueryParameter("apiKey", ApiKey).appendQueryParameter("country", countryList[0])
-                        .appendQueryParameter("category",listData.getTitle()).build();
+                        .appendQueryParameter("category", listData.getTitle()).build();
                 fetchData(uri1.toString());
 
 
@@ -124,8 +134,6 @@ public class HomeFragment extends Fragment {
 
         return view;
     }
-
-
 
 
     public interface Callback {
@@ -142,6 +150,7 @@ public class HomeFragment extends Fragment {
 
                     @Override
                     public void onResponse(JSONObject response) {
+
                         //*********************
                         /* 1 - fetch data from network
                         2- sort data in array list
@@ -150,8 +159,11 @@ public class HomeFragment extends Fragment {
 
                         news_channel = arrangeJasonString(response);
                         updataLayout(news_channel);
+                        new DatabaseOpertation().execute(news_channel);
+
                     }
-                }, new Response.ErrorListener() {
+                }
+                        , new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -232,6 +244,60 @@ public class HomeFragment extends Fragment {
 
     }
 
+
+    public class DatabaseOpertation extends AsyncTask<ArrayList<SourceItem>, Void, Long> {
+
+
+        @Override
+        protected Long doInBackground(ArrayList<SourceItem>... params) {
+            DbHelper helper = new DbHelper(getActivity());
+            SQLiteDatabase liteDatabase = helper.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            long result = 0;
+            /*
+            try {
+                URL url=new URL("");
+                HttpURLConnection URLConnection =(HttpURLConnection)url.openConnection();
+                URLConnection.setRequestMethod("GET");
+                URLConnection.connect();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+*/
+
+            for (ArrayList<SourceItem> c : params) {
+                for (SourceItem c1 : c) {
+                    //Log.v("ahmed darwish",c1.getUrl());
+
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_ID, c1.getId());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_NAME, c1.getName());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_DESCRIPTION, c1.getDescription());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_CATOUGRY, c1.getCategory());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_URL, c1.getUrl());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_LANGUAGE, c1.getLanguage());
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_IMG_LOCATION, " ");
+                    values.put(NewsContract.SoureTable.COLUME_SOURCE_CONUTRY, c1.getCountry());
+                    result = liteDatabase.insert(NewsContract.SoureTable.tableName, null, values);
+
+                }
+            }
+            liteDatabase.close();
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            super.onPostExecute(aLong);
+            if (aLong > -1) {
+                Toast.makeText(getActivity(), "data saved success", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "errot on  saving data", Toast.LENGTH_LONG).show();
+            }
+
+        }
+    }
 
 
 
