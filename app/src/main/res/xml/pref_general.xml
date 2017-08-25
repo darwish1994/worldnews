@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-<ListPreference
-    android:title="number of icon to view"
-    android:key="@string/numViewKey"
-    android:defaultValue="20"
-    android:entryValues="@array/ItemViewNum"
-    android:entries="@array/ItemViewNum"
-    />
+
+    <ListPreference
+        android:defaultValue="20"
+        android:entries="@array/pref_channel_list_titles"
+        android:entryValues="@array/pref_channel_list_values"
+        android:key="number_channel"
+        android:title="@string/number_channel_icon"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
 
 </PreferenceScreen>

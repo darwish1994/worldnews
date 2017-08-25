@@ -40,7 +40,7 @@ public class Home  extends AppCompatActivity implements HomeFragment.Callback   
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(this,Setting.class));
+            startActivity(new Intent(this, Settings.class));
             return true;
         }
 

@@ -2,11 +2,14 @@ package com.app.darwish.worldnews;
 
 import android.app.ActionBar;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -86,9 +89,23 @@ public class HomeFragment extends Fragment {
         scrolelistDatas.add(new ScroleListData(R.drawable.science_and_ature, "science-and-nature"));
         scrolelistDatas.add(new ScroleListData(R.drawable.technology, "technology"));
 
+
     }
 
     //////////////////////////////////////////////////
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//get data for share preferances
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int num_ch = Integer.parseInt(preferences.getString(getString(R.string.pref_channel_list_key), getString(R.string.pref_channel_list_deafoult_value)));
+        max = num_ch;
+        Toast.makeText(getActivity(), String.valueOf(max), Toast.LENGTH_LONG).show();
+
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -135,6 +152,11 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updataLayout(news_channel);
+    }
 
     public interface Callback {
         void onItemSelected(SourceItem news_Channel);
@@ -298,7 +320,6 @@ public class HomeFragment extends Fragment {
 
         }
     }
-
 
 
 }

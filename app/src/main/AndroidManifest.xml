@@ -23,12 +23,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Setting"
-            android:label="@string/setting"
+            android:name=".Settings"
+            android:label="@string/title_activity_settings"
             android:parentActivityName=".Home">
             <meta-data
-                android:name="android.support.PARENT_ACIIVIIY"
-                android:value="Home"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.app.darwish.worldnews.Home" />
         </activity>
     </application>
 
