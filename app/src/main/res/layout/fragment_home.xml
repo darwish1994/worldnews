@@ -17,7 +17,7 @@
 
         <GridView
             android:id="@+id/newsResouresList"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:numColumns="auto_fit">
 

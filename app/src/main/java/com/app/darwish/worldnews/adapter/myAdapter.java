@@ -18,6 +18,7 @@ import com.app.darwish.worldnews.data.SourceItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 /**
  * Created by Darwish on 7/30/2017.
@@ -26,11 +27,13 @@ import java.util.ArrayList;
 public class myAdapter extends ArrayAdapter<SourceItem>  {
     private ArrayList <SourceItem > sourceList;
     private Context newsconext;
+    private int comeResorce;
 
     public myAdapter( Context context, int resource , ArrayList<SourceItem> objects) {
         super(context, resource, objects);
         sourceList=objects;
         newsconext=context;
+        comeResorce = resource;
 
 
     }
@@ -38,16 +41,15 @@ public class myAdapter extends ArrayAdapter<SourceItem>  {
 
     @Override
     public View getView(int position,  View convertView, ViewGroup parent) {
-        View v = convertView;
-
-        if (v == null) {
+        View view = convertView;
+        if (view == null) {
             LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
-            v = vi.inflate(R.layout.griditem, null);
+            vi = LayoutInflater.from(newsconext);
+            view = vi.inflate(R.layout.griditem, null);
         }
 
         SourceItem tempObject = sourceList.get(position);
-        ImageView imageView= (ImageView) v.findViewById(R.id.newssourceimage);
+        ImageView imageView = (ImageView) view.findViewById(R.id.newssourceimage);
         //String xx= tempObject.getUrl().replace("http://","");
 
         String imgUrl="https://logo.clearbit.com/"+tempObject.getUrl()+"?size=370";
@@ -58,7 +60,7 @@ public class myAdapter extends ArrayAdapter<SourceItem>  {
                 .load(imgUrl)
                 .into(imageView);
 
-        return v;
+        return view;
     }
 
     /*

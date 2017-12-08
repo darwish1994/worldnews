@@ -19,11 +19,12 @@ import java.util.ArrayList;
  * Created by Darwish on 8/1/2017.
  */
 
-public class DrowableListAdapter extends ArrayAdapter<ScroleListData> {
+public class DrawableListAdapter extends ArrayAdapter<ScroleListData> {
 
     private Context contextThere;
     private ArrayList<ScroleListData> scroleList;
-    public DrowableListAdapter(Context context, int resource, ArrayList<ScroleListData> objects) {
+
+    public DrawableListAdapter(Context context, int resource, ArrayList<ScroleListData> objects) {
         super(context, resource, objects);
         contextThere=context;
         scroleList=objects;

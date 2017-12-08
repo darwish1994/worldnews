@@ -29,12 +29,14 @@ import java.util.List;
 public class NewsItemAdapter extends ArrayAdapter<NewsData> {
     private ArrayList<NewsData> sourceList;
     private Context newsconext;
+    private int comeResourse;
 
 
     public NewsItemAdapter(Context context, int resource, ArrayList<NewsData> objects) {
         super(context, resource, objects);
         sourceList = objects;
         newsconext = context;
+        comeResourse = resource;
 
 
     }
@@ -42,10 +44,10 @@ public class NewsItemAdapter extends ArrayAdapter<NewsData> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
-
+        //View view=convertView;
         if (v == null) {
             LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
+            vi = LayoutInflater.from(newsconext);
             v = vi.inflate(R.layout.newsitem, null);
         }
 

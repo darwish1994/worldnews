@@ -1,3 +1,9 @@
+/*
+ * copyright (c) are save for Eng.Ahmed Darwish ,
+  * this code written by him and any copy of this code without informing him will be
+   * consider as thief
+ */
+
 package com.app.darwish.worldnews;
 
 
@@ -5,14 +11,12 @@ import android.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,7 +24,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.app.darwish.worldnews.adapter.DrowableListAdapter;
 import com.app.darwish.worldnews.adapter.NewsItemAdapter;
 import com.app.darwish.worldnews.data.NewsData;
 import com.app.darwish.worldnews.data.ScroleListData;
@@ -37,33 +40,22 @@ import java.util.ArrayList;
  */
 public class TheNews extends Fragment {
 
-    public final String ApiKey = "96c44530bf994e24b8691c407182a6c6";
-    public final String[] language = {"en", "fr", "de"};
-    public final String url = "https://newsapi.org/v1/articles";
-    // max resulat
-    private int max = 30;
-    //tpe of sort
-    private String sortby;
-    //get class name
-    private final String classTAG = getClass().getName();
-    //instialise my adapter
-    private NewsItemAdapter newsItemAdapter;
-    //inslize listview
-    private ListView listView;
-    //inslise arra list of news item
-    private ArrayList<NewsData> listnewsDatas = new ArrayList<>();
-    private DrawerLayout mDrawerLayout;
-    private RelativeLayout mDrawerpan;
-    private ListView mDrawerList;
-    private DrowableListAdapter drowableListAdapter;
-    private ArrayList<ScroleListData> scrolelistDatas;
+
+    public final String ApiKey = "96c44530bf994e24b8691c407182a6c6"; // api uer key
+    public final String[] language = {"en", "fr", "de"}; // supported language
+    public final String url = "https://newsapi.org/v1/articles"; // url of articles
+    private int max = 30; // max resulat
+    private String sortby; //tpe of sort
+    private final String classTAG = getClass().getName(); //get class name to know error where take place
+    private NewsItemAdapter newsItemAdapter; //create articles adapter
+    private ListView listView;  //create and intlise listView that will contain news articles
+    private ArrayList<NewsData> listNewsDatas = new ArrayList<>(); //inslise arra list of news item
+    private int start = 0, length = 30;
+    boolean end_flag = false;
 
 
     public TheNews() {
-        // Required empty public constructor
-        scrolelistDatas = new ArrayList<>();
-        scrolelistDatas.add(new ScroleListData(R.drawable.sport, "Sport"));
-        scrolelistDatas.add(new ScroleListData(R.drawable.business, "business"));
+
     }
 
     @Override
@@ -82,38 +74,48 @@ public class TheNews extends Fragment {
         Bundle arguments = getArguments();
         SourceItem sourceItem;
 
+
         try {
             if (arguments != null) {
                 sourceItem = arguments.getParcelable("JsonObject");
                 //Toast.makeText(getActivity(),sourceItem.getUrl(),Toast.LENGTH_LONG).show();
 
-                if ((sourceItem.getSortby()[1]).length() > 0) {
-                    sortby = sourceItem.getSortby()[1];
-                } else {
+//                if ((sourceItem.getSortby()[1]).length() > 0) {
+//                    sortby = sourceItem.getSortby()[1];
+//                } else {
                     sortby = sourceItem.getSortby()[0];
-                }
+//                }
 
-                Uri uri = Uri.parse(url).buildUpon().appendQueryParameter("source", sourceItem.getId())
-                        .appendQueryParameter("sortBy", sortby).
-                                appendQueryParameter("apiKey", ApiKey).build();
+                Uri uri = Uri.parse(url).buildUpon()
+                        .appendQueryParameter("source", sourceItem.getId())
+                        .appendQueryParameter("sortBy", sortby)
+                        .appendQueryParameter("apiKey", ApiKey).build();
                 fetchData(uri.toString());
 
             }
 
-            newsItemAdapter = new NewsItemAdapter(getActivity(), R.layout.newsitem, listnewsDatas);
+
+            //newsItemAdapter = new NewsItemAdapter(getActivity(), R.layout.loading, null);
+            newsItemAdapter = new NewsItemAdapter(getActivity(), R.layout.newsitem, listNewsDatas);
             listView = (ListView) v.findViewById(R.id.newsList);
             listView.setAdapter(newsItemAdapter);
+
+
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    NewsData newsData = newsItemAdapter.getItem(position);
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable("articlItem", newsData);
-                    WebNews webNews = new WebNews();
-                    webNews.setArguments(bundle);
-                    FragmentManager manager = getFragmentManager();
-                    manager.beginTransaction().replace(R.id.replaceWithWeb, (Fragment) webNews).addToBackStack("articles").commit();
+                    if (newsItemAdapter.getItem(position) == null) {
+                        updataLayout(listNewsDatas, start, length);
+                    } else {
+                        NewsData newsData = newsItemAdapter.getItem(position);
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable("articlItem", newsData);
+                        WebNews webNews = new WebNews();
+                        webNews.setArguments(bundle);
+                        FragmentManager manager = getFragmentManager();
+                        manager.beginTransaction().replace(R.id.replaceWithWeb, (Fragment) webNews).addToBackStack("articles").commit();
 
+                    }
                 }
             });
 
@@ -127,6 +129,11 @@ public class TheNews extends Fragment {
         return v;
     }
 
+    protected void loadnews(int from, int to) {
+
+
+    }
+
 
     public void fetchData(final String url) {
 
@@ -138,13 +145,13 @@ public class TheNews extends Fragment {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        //*********************
-                        /* 1 - fetch data from network
-                        2- sort data in array list
-                        3- update view of layout
-                         */
-                        listnewsDatas = arrangeJasonString(response);
-                        updataLayout(listnewsDatas);
+
+//                        1 - fetch data from network
+//                        2- sort data in array list
+//                        3- update view of layout
+
+                        listNewsDatas = arrangeJasonString(response);
+                        updataLayout(listNewsDatas, start, length);
 
                     }
                 }, new Response.ErrorListener() {
@@ -199,9 +206,9 @@ public class TheNews extends Fragment {
                 newsData.setPublishedAt(Data.getString(publishedAt));
 
                 packet.add(newsData);
-                if (i >= max) {
-                    break;
-                }
+//                if (i >= max) {
+//                    break;
+//                }
             }
             return packet;
 
@@ -214,15 +221,25 @@ public class TheNews extends Fragment {
 
     }
 
-    public void updataLayout(ArrayList<NewsData> x) {
+    public void updataLayout(ArrayList<NewsData> x, int st, int end) {
         if (!x.isEmpty()) {
-            newsItemAdapter.clear();
-
-            for (NewsData c : x) {
-
-                newsItemAdapter.add(c);
-
+            ArrayList<NewsData> mylist = new ArrayList<>();
+            int array_len = x.size();
+            if (st == 0) {
+                newsItemAdapter.clear();
             }
+            for (; st < end; st++) {
+                if (st == array_len - 1) {
+                    end_flag = true;
+                    break;
+                }
+                mylist.add(x.get(st));
+            }
+            newsItemAdapter.addAll(mylist);
+            //newsItemAdapter = new NewsItemAdapter(getActivity(), R.layout.newsitem, mylist);
+            //newsItemAdapter.notifyDataSetChanged();
+            start = st;
+            length = st + 30;
         }
 
 
